@@ -1,51 +1,19 @@
-name: Build and Publish
+name: CI/CD
 
-on:
-  push:
-    branches:
-    - main # ou outra branch que deseje monitorar
-  pull_request:
-    branches:
-    - main # ou outra branch que deseje monitorar
+on: pull_request
 
 jobs:
-  build-and-publish:
+  ci-cd:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Use Node.js 16
+      - uses: action/checkout/@v3
+      - name: Using Node.js
         uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build # Substitua pelo script de build correto
-
-      - name: Bump Version
-        id: version
-        run: |
-          npm version patch -m "Bump version to %s [skip ci]"
-          echo "::set-output name=new_version::$(npm version --json | jq -r '.version')"
-
-      - name: Publish to npm
-        if: github.ref == 'refs/heads/main' # Condição para publicar apenas na branch main
-        run: |
-          npm publish --access public # Se necessário, ajuste as configurações de acesso
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }} # Configure seu token do npm como um secret
-
-      - name: Set GitHub Release
-        uses: actions/create-release@v1
-        if: github.ref == 'refs/heads/main' # Condição para criar release apenas na branch main
-        with:
-          tag_name: ${{ steps.version.outputs.new_version }}
-          release_name: Release ${{ steps.version.outputs.new_version }}
-          body: |
-            Release ${{ steps.version.outputs.new_version }}
-
+        with: 
+          node-version: 18.x
+      - name: run install, build
+        run: | 
+          npm install
+          npm run build
+          npm publish
