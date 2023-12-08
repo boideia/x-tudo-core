@@ -1,13 +1,19 @@
-import { LitElement, html } from 'lit'
-import { customElement } from 'lit/decorators.js'
+import { LitElement, html, unsafeCSS } from 'lit'
+// import { customElement } from 'lit/decorators.js'
 
-@customElement('my-element')
-export class MyElement extends LitElement {
+import styles from './styles.scss?inline';
+
+// @customElement('my-element')
+export default class MyElement extends LitElement {
+
+  static styles = unsafeCSS(styles);
 
   render() {
     return html`
-      <div>Hello Component</div>
+      <div class="element">Hello Component</div>
     `
   }
 
 }
+
+customElements.define('my-element', MyElement);

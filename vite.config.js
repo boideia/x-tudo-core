@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import fs from 'fs';
 
 export default defineConfig({
   optimizeDeps: {
@@ -11,17 +12,35 @@ export default defineConfig({
 
   build: {
     rollupOptions: {
-      input: {
-        // Caminhos para os arquivos dos seus componentes
-        element: path.resolve(__dirname, 'src/components/element/component.ts'),
-      },
+      input: getInputs(),
       output: {
         // Cria um arquivo separado para cada componente
-        entryFileNames: 'lib/[name].js',
+        entryFileNames: '[name].js',
         format: 'es',
-        chunkFileNames: 'lib/[name]-[hash].js',
+        chunkFileNames: '[name]-[hash].js',
         dir: 'dist', // Diretório de saída dos arquivos gerados
       },
     },
   },
+
+  minify: true,
+  rollupOptions: {
+    external: /^lit/
+  }
+  
 });
+
+
+function getInputs() {
+  const componentsPath = path.resolve(__dirname, 'src/components');
+  const components = fs.readdirSync(componentsPath)
+    .filter(file => fs.statSync(path.join(componentsPath, file)).isDirectory())
+    .map(folder => {
+      const componentPath = path.join(componentsPath, folder, 'component.ts');
+      return {
+        [folder]: componentPath,
+      };
+    });
+
+  return Object.assign({}, ...components);
+}
